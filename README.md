@@ -11,13 +11,13 @@ Hits (view) counter for CakePHP 3 ORM.
 
 Using [Composer][composer]:
 
-```
+```shell
 composer require muffin/hits:1.0.x-dev
 ```
 
 You then need to load the plugin. You can use the shell command:
 
-```
+```shell
 bin/cake plugin load Muffin/Hits
 ```
 
@@ -39,7 +39,7 @@ $this->addBehavior('Muffin/Hits.Hits', ['view_count']);
 
 Or more than just one field, the other one based on certain conditions:
 
-```
+```php
 $this->addBehavior('Muffin/Hits.Hits', [
     // count only if the post is published
     'view_count' => ['is_published' => true],
