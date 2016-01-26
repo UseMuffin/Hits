@@ -2,11 +2,11 @@
 namespace Muffin\Hits\Model\Behavior;
 
 use ArrayObject;
-use Cake\Database\Expression\QueryExpression;
 use Cake\Event\Event;
 use Cake\ORM\Behavior;
 use Cake\ORM\Query;
-use Cake\ORM\TableRegistry;
+use Muffin\Hits\Model\Behavior\Strategy\DefaultStrategy;
+use Muffin\Hits\Model\Behavior\Strategy\StrategyInterface;
 
 class HitsBehavior extends Behavior
 {
@@ -50,31 +50,9 @@ class HitsBehavior extends Behavior
                     continue;
                 }
 
-                $this->increment($counter, $expression->getValue(), $config['conditions']);
+                $config['strategy']->increment($counter, $expression->getValue());
             }
         });
-    }
-
-    /**
-     * @param $counter
-     * @param $primaryKey
-     * @param array $conditions
-     */
-    public function increment($counter, $primaryKey, array $conditions = [])
-    {
-        $increment = $this->config('counters.' . $counter . '.increment');
-        $expression = new QueryExpression("$counter = $counter + $increment");
-
-        $table = $this->_table;
-        if (strpos($counter, '.') !== false) {
-            $parts = explode('.', $counter);
-            array_pop($parts);
-            $table = TableRegistry::get(implode('.', $parts));
-        }
-
-        $conditions[$this->_table->primaryKey()] = $primaryKey;
-
-        return $table->updateAll($expression, $conditions);
     }
 
     /**
@@ -90,20 +68,31 @@ class HitsBehavior extends Behavior
             }
 
             if (is_array($options)
-                && !isset($options['conditions'])
+                && !isset($options['strategy'])
                 && !isset($options['callback'])
             ) {
                 $options = ['conditions' => $options];
+            }
+
+            if ($options instanceof StrategyInterface) {
+                $options = ['strategy' => $options];
             }
 
             if (is_callable($options)) {
                 $options = ['callback' => $options];
             }
 
+            if (isset($options['conditions']) || isset($options['increment'])) {
+                $options += ['conditions' => [], 'increment' => 1];
+                if (!isset($options['strategy'])) {
+                    $options['strategy'] = new DefaultStrategy($options['conditions'], $options['increment']);
+                }
+                unset($options['conditions'], $options['increment']);
+            }
+
             $options += [
                 'callback' => null,
-                'conditions' => [],
-                'increment' => 1,
+                'strategy' => new DefaultStrategy(),
             ];
 
             $counters[$counter] = $options;

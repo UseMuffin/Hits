@@ -3,6 +3,7 @@ namespace Muffin\Hits\Test\Model\Behavior;
 
 use Cake\TestSuite\TestCase;
 use Muffin\Hits\Model\Behavior\HitsBehavior;
+use Muffin\Hits\Model\Behavior\Strategy\DefaultStrategy;
 
 class HitsBehaviorTest extends TestCase
 {
@@ -15,8 +16,7 @@ class HitsBehaviorTest extends TestCase
         $implementedMethods = [];
         $defaults = [
             'callback' => null,
-            'conditions' => [],
-            'increment' => 1,
+            'strategy' => new DefaultStrategy(),
         ];
 
         $counters = ['view_count' => $defaults];
@@ -33,7 +33,7 @@ class HitsBehaviorTest extends TestCase
         $this->assertEquals($expected, $behavior->config());
 
         $config = ['view_count' => ['status' => 'active']];
-        $counters = ['view_count' => ['conditions' => $config['view_count']] + $defaults];
+        $counters = ['view_count' => ['strategy' => new DefaultStrategy(['status' => 'active'])] + $defaults];
         $expected = compact('counters', 'implementedMethods');
         $behavior->initialize($config);
         $this->assertEquals($expected, $behavior->config());
