@@ -2,6 +2,7 @@
 namespace Muffin\Hits\Model\Behavior\Strategy;
 
 use Cake\Database\Expression\QueryExpression;
+use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;
 
 class DefaultStrategy extends AbstractStrategy
@@ -15,12 +16,16 @@ class DefaultStrategy extends AbstractStrategy
         $this->$_offset = 1;
     }
 
-    public function increment($counter, $identifier)
+    public function increment(Table $table, $counter, $identifier)
     {
         list($alias, $field) = $this->_counterSplit($counter);
-        $table = TableRegistry::get($alias);
-        $expression = new QueryExpression("$counter = $counter + " . $this->_offset);
         $conditions = [$table->aliasField($table->primaryKey()) => $identifier];
-        return $table->updateAll($expression, $conditions);
+        if ($table->alias() !== $alias) {
+            $conditions = [];
+            $table = TableRegistry::get($alias);
+        }
+
+        $expression = new QueryExpression("$field = $field + " . $this->_offset);
+        return $table->updateAll($expression, $conditions + $this->_conditions);
     }
 }

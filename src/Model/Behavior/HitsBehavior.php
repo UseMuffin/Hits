@@ -50,7 +50,7 @@ class HitsBehavior extends Behavior
                     continue;
                 }
 
-                $config['strategy']->increment($counter, $expression->getValue());
+                $config['strategy']->increment($this->_table, $counter, $expression->getValue());
             }
         });
     }
