@@ -19,22 +19,22 @@ class HitsBehaviorTest extends TestCase
             'increment' => 1,
         ];
 
-        $fields = ['view_count' => $defaults];
-        $expected = compact('fields', 'implementedMethods');
+        $counters = ['view_count' => $defaults];
+        $expected = compact('counters', 'implementedMethods');
         $this->assertEquals($expected, $behavior->config());
 
-        $behavior->initialize($fields);
+        $behavior->initialize($counters);
         $this->assertEquals($expected, $behavior->config());
 
         $config = ['view_count' => function () {}];
-        $fields = ['view_count' => ['callback' => $config['view_count']] + $defaults];
-        $expected = compact('fields', 'implementedMethods');
+        $counters = ['view_count' => ['callback' => $config['view_count']] + $defaults];
+        $expected = compact('counters', 'implementedMethods');
         $behavior->initialize($config);
         $this->assertEquals($expected, $behavior->config());
 
         $config = ['view_count' => ['status' => 'active']];
-        $fields = ['view_count' => ['conditions' => $config['view_count']] + $defaults];
-        $expected = compact('fields', 'implementedMethods');
+        $counters = ['view_count' => ['conditions' => $config['view_count']] + $defaults];
+        $expected = compact('counters', 'implementedMethods');
         $behavior->initialize($config);
         $this->assertEquals($expected, $behavior->config());
     }

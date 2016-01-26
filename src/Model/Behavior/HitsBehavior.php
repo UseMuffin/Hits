@@ -42,32 +42,32 @@ class HitsBehavior extends Behavior
                 return $expression;
             }
 
-            foreach ($this->config('fields') as $field => $config) {
-                $args = [$field, $options];
+            foreach ($this->config('counters') as $counter => $config) {
+                $args = [$counter, $options];
                 if (!empty($config['callback']) && is_callable($config['callback'])
                     && !call_user_func_array($config['callback'], $args)
                 ) {
                     continue;
                 }
 
-                $this->increment($field, $expression->getValue(), $config['conditions']);
+                $this->increment($counter, $expression->getValue(), $config['conditions']);
             }
         });
     }
 
     /**
-     * @param $field
+     * @param $counter
      * @param $primaryKey
      * @param array $conditions
      */
-    public function increment($field, $primaryKey, array $conditions = [])
+    public function increment($counter, $primaryKey, array $conditions = [])
     {
-        $increment = $this->config('fields.' . $field . '.increment');
-        $expression = new QueryExpression("$field = $field + $increment");
+        $increment = $this->config('counters.' . $counter . '.increment');
+        $expression = new QueryExpression("$counter = $counter + $increment");
 
         $table = $this->_table;
-        if (strpos($field, '.') !== false) {
-            $parts = explode('.', $field);
+        if (strpos($counter, '.') !== false) {
+            $parts = explode('.', $counter);
             array_pop($parts);
             $table = TableRegistry::get(implode('.', $parts));
         }
@@ -80,12 +80,12 @@ class HitsBehavior extends Behavior
     /**
      * @param $config
      */
-    protected function _normalizeConfig($fields)
+    protected function _normalizeConfig($counters)
     {
-        foreach ($fields as $field => $options) {
-            if (is_numeric($field) && is_string($options)) {
-                unset($fields[$field]);
-                $field = $options;
+        foreach ($counters as $counter => $options) {
+            if (is_numeric($counter) && is_string($options)) {
+                unset($counters[$counter]);
+                $counter = $options;
                 $options = [];
             }
 
@@ -106,11 +106,11 @@ class HitsBehavior extends Behavior
                 'increment' => 1,
             ];
 
-            $fields[$field] = $options;
+            $counters[$counter] = $options;
         }
 
         $this->_config = [
-            'fields' => $fields,
+            'counters' => $counters,
             'implementedMethods' => [],
         ];
     }
