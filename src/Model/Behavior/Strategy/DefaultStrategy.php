@@ -19,13 +19,14 @@ class DefaultStrategy extends AbstractStrategy
     public function increment(Table $table, $counter, $identifier)
     {
         list($alias, $field) = $this->_counterSplit($counter);
-        $conditions = [$table->aliasField($table->primaryKey()) => $identifier];
+        $key = $table->primaryKey();
         if ($table->alias() !== $alias) {
-            $conditions = [];
+            $key = $table->$alias->bindingKey();
             $table = TableRegistry::get($alias);
         }
 
         $expression = new QueryExpression("$field = $field + " . $this->_offset);
-        return $table->updateAll($expression, $conditions + $this->_conditions);
+        $conditions = [$key => $identifier] + $this->_conditions;
+        return $table->updateAll($expression, $conditions);
     }
 }
