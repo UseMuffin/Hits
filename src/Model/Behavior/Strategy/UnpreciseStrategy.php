@@ -31,7 +31,7 @@ class UnpreciseStrategy implements StrategyInterface
             $table = TableRegistry::get($alias);
         }
 
-        $table->updateAll([$field => $this->_precision], [$key => $identifier]);
+        $table->updateAll([$field => $this->_precision * $this->_offset], [$key => $identifier]);
     }
 
 }
