@@ -82,12 +82,12 @@ class HitsBehavior extends Behavior
                 $options = ['callback' => $options];
             }
 
-            if (isset($options['conditions']) || isset($options['increment'])) {
-                $options += ['conditions' => [], 'increment' => 1];
+            if (isset($options['conditions']) || isset($options['offset'])) {
+                $options += ['conditions' => [], 'offset' => 1];
                 if (!isset($options['strategy'])) {
-                    $options['strategy'] = new DefaultStrategy($options['conditions'], $options['increment']);
+                    $options['strategy'] = new DefaultStrategy($options['conditions'], $options['offset']);
                 }
-                unset($options['conditions'], $options['increment']);
+                unset($options['conditions'], $options['offset']);
             }
 
             $options += [
