@@ -53,7 +53,7 @@ Or based on certain options passed to the `Model.beforeFind` event (i.e. authent
 ```php
 $this->addBehavior('Muffin/Hits.Hits', [
     // count only if the user viewing it is not an admin
-    'view_count' => function ($field, \ArrayObject $options) {
+    'view_count' => function (\Cake\ORM\Query $query, \ArrayObject $options, $counter) {
         return !isset($options['_footprint'])
             || $options['_footprint']->is_admin === false;
     },
@@ -76,7 +76,7 @@ To use them all at once:
 $this->addBehavior('Muffin/Hits.Hits', [
     'view_count' => [
         'conditions' => ['is_published' => true],
-        'callback' => function ($field, \ArrayObject $options) {
+        'callback' => function (\Cake\ORM\Query $query, \ArrayObject $options, $counter) {
             return !isset($options['_footprint'])
                 || $options['_footprint']->is_admin === false;
         },

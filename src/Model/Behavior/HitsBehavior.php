@@ -43,7 +43,7 @@ class HitsBehavior extends Behavior
             }
 
             foreach ($this->config('counters') as $counter => $config) {
-                $args = [$counter, $options];
+                $args = [$query, $options, $counter];
                 if (!empty($config['callback']) && is_callable($config['callback'])
                     && !call_user_func_array($config['callback'], $args)
                 ) {
