@@ -3,6 +3,7 @@ namespace Muffin\Hits\Test\Model\Behavior;
 
 use Cake\TestSuite\TestCase;
 use Muffin\Hits\Model\Behavior\HitsBehavior;
+use Muffin\Hits\Model\Behavior\Strategy\DefaultStrategy;
 
 class HitsBehaviorTest extends TestCase
 {
@@ -15,26 +16,25 @@ class HitsBehaviorTest extends TestCase
         $implementedMethods = [];
         $defaults = [
             'callback' => null,
-            'conditions' => [],
-            'increment' => 1,
+            'strategy' => new DefaultStrategy(),
         ];
 
-        $fields = ['view_count' => $defaults];
-        $expected = compact('fields', 'implementedMethods');
+        $counters = ['view_count' => $defaults];
+        $expected = compact('counters', 'implementedMethods');
         $this->assertEquals($expected, $behavior->config());
 
-        $behavior->initialize($fields);
+        $behavior->initialize($counters);
         $this->assertEquals($expected, $behavior->config());
 
         $config = ['view_count' => function () {}];
-        $fields = ['view_count' => ['callback' => $config['view_count']] + $defaults];
-        $expected = compact('fields', 'implementedMethods');
+        $counters = ['view_count' => ['callback' => $config['view_count']] + $defaults];
+        $expected = compact('counters', 'implementedMethods');
         $behavior->initialize($config);
         $this->assertEquals($expected, $behavior->config());
 
         $config = ['view_count' => ['status' => 'active']];
-        $fields = ['view_count' => ['conditions' => $config['view_count']] + $defaults];
-        $expected = compact('fields', 'implementedMethods');
+        $counters = ['view_count' => ['strategy' => new DefaultStrategy(['status' => 'active'])] + $defaults];
+        $expected = compact('counters', 'implementedMethods');
         $behavior->initialize($config);
         $this->assertEquals($expected, $behavior->config());
     }

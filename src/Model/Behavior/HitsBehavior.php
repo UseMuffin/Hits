@@ -2,11 +2,11 @@
 namespace Muffin\Hits\Model\Behavior;
 
 use ArrayObject;
-use Cake\Database\Expression\QueryExpression;
 use Cake\Event\Event;
 use Cake\ORM\Behavior;
 use Cake\ORM\Query;
-use Cake\ORM\TableRegistry;
+use Muffin\Hits\Model\Behavior\Strategy\DefaultStrategy;
+use Muffin\Hits\Model\Behavior\Strategy\StrategyInterface;
 
 class HitsBehavior extends Behavior
 {
@@ -42,75 +42,64 @@ class HitsBehavior extends Behavior
                 return $expression;
             }
 
-            foreach ($this->config('fields') as $field => $config) {
-                $args = [$field, $options];
+            foreach ($this->config('counters') as $counter => $config) {
+                $args = [$counter, $options];
                 if (!empty($config['callback']) && is_callable($config['callback'])
                     && !call_user_func_array($config['callback'], $args)
                 ) {
                     continue;
                 }
 
-                $this->increment($field, $expression->getValue(), $config['conditions']);
+                $config['strategy']->increment($this->_table, $counter, $expression->getValue());
             }
         });
     }
 
     /**
-     * @param $field
-     * @param $primaryKey
-     * @param array $conditions
-     */
-    public function increment($field, $primaryKey, array $conditions = [])
-    {
-        $increment = $this->config('fields.' . $field . '.increment');
-        $expression = new QueryExpression("$field = $field + $increment");
-
-        $table = $this->_table;
-        if (strpos($field, '.') !== false) {
-            $parts = explode('.', $field);
-            array_pop($parts);
-            $table = TableRegistry::get(implode('.', $parts));
-        }
-
-        $conditions[$this->_table->primaryKey()] = $primaryKey;
-
-        return $table->updateAll($expression, $conditions);
-    }
-
-    /**
      * @param $config
      */
-    protected function _normalizeConfig($fields)
+    protected function _normalizeConfig($counters)
     {
-        foreach ($fields as $field => $options) {
-            if (is_numeric($field) && is_string($options)) {
-                unset($fields[$field]);
-                $field = $options;
+        foreach ($counters as $counter => $options) {
+            if (is_numeric($counter) && is_string($options)) {
+                unset($counters[$counter]);
+                $counter = $options;
                 $options = [];
             }
 
             if (is_array($options)
-                && !isset($options['conditions'])
+                && !isset($options['strategy'])
                 && !isset($options['callback'])
             ) {
                 $options = ['conditions' => $options];
+            }
+
+            if ($options instanceof StrategyInterface) {
+                $options = ['strategy' => $options];
             }
 
             if (is_callable($options)) {
                 $options = ['callback' => $options];
             }
 
+            if (isset($options['conditions']) || isset($options['offset'])) {
+                $options += ['conditions' => [], 'offset' => 1];
+                if (!isset($options['strategy'])) {
+                    $options['strategy'] = new DefaultStrategy($options['conditions'], $options['offset']);
+                }
+                unset($options['conditions'], $options['offset']);
+            }
+
             $options += [
                 'callback' => null,
-                'conditions' => [],
-                'increment' => 1,
+                'strategy' => new DefaultStrategy(),
             ];
 
-            $fields[$field] = $options;
+            $counters[$counter] = $options;
         }
 
         $this->_config = [
-            'fields' => $fields,
+            'counters' => $counters,
             'implementedMethods' => [],
         ];
     }
