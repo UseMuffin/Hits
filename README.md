@@ -86,7 +86,27 @@ $this->addBehavior('Muffin/Hits.Hits', [
 ]);
 ```
 
-That's it!
+### Strategies
+
+Different strategies for keeping track of counts are made available. 
+
+**DefaultStrategy(array $conditions = [], $offset = 1)** (default)
+
+This strategy, while maybe slow for some use cases, is the most widely used. It is also the only
+one that allows for extra conditions to be passed. Will hit the database on every increment operation.
+
+**CacheStrategy(CacheEngine $cache, $threshold = 100, $offset = 1)**
+ 
+This strategy is to be used for the most used counters. It will cache the counts by intervals and hit
+the database only once it hits the threshold.
+
+
+**SamplingStrategy(StrategyInterface $strategy, $size = 100)**
+
+To hit the database the lease and if precise numbers are not an issue, a common strategy used by big
+sites is called *sampling*. It relies on a sample size to generate a random number before triggering
+the `increment` method on the strategy it wraps (which should have its threshold multiplied by the
+sample size).
 
 ## Patches & Features
 

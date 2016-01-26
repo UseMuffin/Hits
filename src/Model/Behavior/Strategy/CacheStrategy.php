@@ -8,13 +8,13 @@ use Cake\ORM\TableRegistry;
 class CacheStrategy extends AbstractStrategy
 {
     protected $_cache;
-    protected $_interval;
+    protected $_threshold;
     protected $_offset;
 
-    public function __construct(CacheEngine $cache, $interval = 100, $offset = 1)
+    public function __construct(CacheEngine $cache, $threshold = 100, $offset = 1)
     {
         $this->_cache = $cache;
-        $this->_interval = $interval;
+        $this->_threshold = $threshold;
         $this->_offset = $offset;
     }
 
@@ -35,7 +35,7 @@ class CacheStrategy extends AbstractStrategy
 
         $count = $this->_cache->increment($counter, $this->_offset);
 
-        if (!($count % $this->_interval)) {
+        if (!($count % $this->_threshold)) {
             return;
         }
 
