@@ -95,6 +95,11 @@ class HitsBehavior extends Behavior
                 'strategy' => new DefaultStrategy(),
             ];
 
+            if (strpos($counter, '.') === false) {
+                unset($counters[$counter]);
+                $counter = implode('.', [$this->_table->alias(), $counter]);
+            }
+
             $counters[$counter] = $options;
         }
 
