@@ -33,7 +33,7 @@ class HitsBehavior extends Behavior
             return;
         }
 
-        $query->traverseExpressions(function ($expression) use ($options) {
+        $query->traverseExpressions(function ($expression) use ($query, $options) {
             $primaryKey = $this->_table->primaryKey();
             $allowedFields = [$primaryKey, $this->_table->aliasField($primaryKey)];
             if (!method_exists($expression, 'getField')
