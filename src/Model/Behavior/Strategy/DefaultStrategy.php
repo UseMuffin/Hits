@@ -13,7 +13,7 @@ class DefaultStrategy extends AbstractStrategy
     public function __construct(array $conditions = [], $offset = 1)
     {
         $this->_conditions = $conditions;
-        $this->$_offset = 1;
+        $this->_offset = 1;
     }
 
     public function increment(Table $table, $counter, $identifier)
